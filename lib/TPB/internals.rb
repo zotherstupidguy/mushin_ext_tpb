@@ -13,8 +13,9 @@ module TPB
       p query
       uri 	=  "https://thepiratebay.org/search/#{URI.escape(query)}"
       
-      p "running #{File.dirname(__FILE__)}/IUAM.js #{uri}"
-      stdin, scraped, stderr 	= Open3.popen3("node #{File.dirname(__FILE__)}/IUAM.js #{uri}")
+      #p "running #{File.dirname(__FILE__)}/IUAM.js #{uri}"
+      #stdin, scraped, stderr 	= Open3.popen3("node #{File.dirname(__FILE__)}/IUAM.js #{uri}")
+      scraped = open(uri) 
       p scraped
       doc 			= Nokogiri::HTML(scraped)
 
