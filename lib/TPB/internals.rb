@@ -9,46 +9,15 @@ module TPB
     class EmptyQuery < RuntimeError
     end
 
-    def check_service(url, params)
-      begin
-	response = HTTParty.get(url, query: params, :verify => false)
-	begin
-	  if response.code == 200
-	    p "everything fine"
-	    return true
-	  else
-	    p response.code
-	    p "unexpected status code"
-	    return false
-	  end
-	rescue Timeout::Error
-	  p "timeout reading from server"
-	  return false
-	end
-      rescue Timeout::Error
-	p "timeout connecting to server"
-	return false
-      rescue SocketError
-	p "unknown server"
-	return false
-      end
-    end
-
     def search(query)
       p query
       uri 	=  "https://thepiratebay.org/search/#{URI.escape(query)}"
-      case check_service(uri, "")
-      when true 
-	stdin, scraped, stderr = Open3.popen3("node #{File.dirname(__FILE__)}/IUAM.js #{uri}")
-	p scraped
-	doc 	= Nokogiri::HTML(scraped)
-      when false
-	stdin, scraped, stderr = Open3.popen3("node #{File.dirname(__FILE__)}/IUAM.js #{uri}")
-	p scraped
-	doc 	= Nokogiri::HTML(scraped)
-      else
-	p "tpb is not online, skip it Gracefully"
-      end
+      
+      p "running #{File.dirname(__FILE__)}/IUAM.js #{uri}"
+      stdin, scraped, stderr 	= Open3.popen3("node #{File.dirname(__FILE__)}/IUAM.js #{uri}")
+      p scraped
+      doc 			= Nokogiri::HTML(scraped)
+
       @results = Hash.new
       @results[:torrents] = []
 
@@ -85,6 +54,7 @@ module TPB
 	#TODO make the service make sure its .to_json
 	@results[:torrents] << { :seeders => seeders, :leechers => leechers, :upload_date => upload_date, :total_size => total_size, :name => name.text, :magnet_link => magnet_link } 
       end
+
       finish_time = Time.now
 
       @results[:results_count] = @results[:torrents].count

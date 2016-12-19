@@ -25,9 +25,11 @@ module TPB
 	p "empty query is no good"
       else 
 	results = search(env[:query])
-	env[:tpbbot] = results 
+	env[:tpb] = results 
       end
+
       @app.call(env)
+
       $log.debug "#{self} ------ Outbound maniuplation"
     end
   end
